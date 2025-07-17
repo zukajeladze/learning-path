@@ -197,7 +197,7 @@ export default function Home() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-colors"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed font-semibold text-lg transition-colors"
             >
               {loading ? 'Generating...' : 'Create Path'}
             </button>
@@ -219,7 +219,7 @@ export default function Home() {
           </div>
         )}
 
-        {learningPath && (
+        {learningPath && !loading && (
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-3">
