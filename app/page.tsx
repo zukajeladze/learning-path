@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface LearningStep {
   id: number;
@@ -21,6 +21,14 @@ export default function Home() {
   const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [animateTimeline, setAnimateTimeline] = useState(false);
+
+  useEffect(() => {
+    if (learningPath) {
+      // Start timeline animation after data loads
+      setTimeout(() => setAnimateTimeline(true), 300);
+    }
+  }, [learningPath]);
 
   const handleSubmit = async () => {
     if (!skill.trim()) {
@@ -30,6 +38,7 @@ export default function Home() {
 
     setLoading(true);
     setError('');
+    setAnimateTimeline(false);
 
     try {
       const response = await fetch('/api/generate-syllabus', {
@@ -101,17 +110,31 @@ export default function Home() {
   const renderLearningTimeline = () => {
     if (!learningPath) return null;
 
+    const totalSteps = learningPath.steps.length + 2; // +2 for start and end
+
     return (
       <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 via-purple-500 to-green-500"></div>
+        {/* Animated Timeline line */}
+        <div className="absolute left-8 top-0 bottom-0 w-1 bg-gray-200 rounded-full"></div>
+        <div
+          className={`absolute left-8 top-0 w-1 bg-gradient-to-b from-blue-400 via-purple-500 to-green-500 rounded-full transition-all duration-[3000ms] ease-out ${
+            animateTimeline ? 'bottom-0' : 'bottom-full'
+          }`}
+        ></div>
 
         {/* Start node */}
-        <div className="flex items-center mb-8">
-          <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-lg shadow-lg z-10">
+        <div
+          className={`flex items-center mb-8 transform transition-all duration-700 ease-out ${
+            animateTimeline
+              ? 'translate-x-0 opacity-100'
+              : '-translate-x-12 opacity-0'
+          }`}
+          style={{ animationDelay: '500ms' }}
+        >
+          <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-lg shadow-lg z-10 transform transition-transform hover:scale-110 duration-300">
             🚀
           </div>
-          <div className="ml-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+          <div className="ml-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 transform transition-all hover:shadow-md hover:scale-[1.02] duration-300">
             <h3 className="text-xl font-bold text-blue-800">Start Learning</h3>
             <p className="text-blue-600">
               Begin your journey to master {skill}
@@ -119,17 +142,31 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Learning steps */}
+        {/* Learning steps with staggered animation */}
         {learningPath.steps.map((step, index) => (
-          <div key={step.id} className="flex items-center mb-8">
+          <div
+            key={step.id}
+            className={`flex items-center mb-8 transform transition-all duration-700 ease-out ${
+              animateTimeline
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-12 opacity-0'
+            }`}
+            style={{
+              animationDelay: `${800 + index * 200}ms`,
+              transitionDelay: `${800 + index * 200}ms`,
+            }}
+          >
             <div
-              className="rounded-full w-16 h-16 flex items-center justify-center font-bold text-white shadow-lg z-10 text-lg"
-              style={{ backgroundColor: getDifficultyColor(step.difficulty) }}
+              className="rounded-full w-16 h-16 flex items-center justify-center font-bold text-white shadow-lg z-10 text-lg transform transition-all hover:scale-110 duration-300 pulse-ring"
+              style={{
+                backgroundColor: getDifficultyColor(step.difficulty),
+                animationDelay: `${1000 + index * 200}ms`,
+              }}
             >
               {index + 1}
             </div>
             <div
-              className={`ml-6 p-6 rounded-lg border-l-4 flex-1 ${getBorderColor(
+              className={`ml-6 p-6 rounded-lg border-l-4 flex-1 transform transition-all hover:shadow-lg hover:scale-[1.01] duration-300 ${getBorderColor(
                 step.difficulty
               )}`}
             >
@@ -138,10 +175,14 @@ export default function Home() {
                   {step.title}
                 </h3>
                 <div className="flex gap-2">
-                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium transform transition-transform hover:scale-105 duration-200">
                     📅 {step.duration}
                   </span>
-                  <span className={getDifficultyBadge(step.difficulty)}>
+                  <span
+                    className={`${getDifficultyBadge(
+                      step.difficulty
+                    )} transform transition-transform hover:scale-105 duration-200`}
+                  >
                     📊 {step.difficulty}
                   </span>
                 </div>
@@ -154,11 +195,21 @@ export default function Home() {
         ))}
 
         {/* End node */}
-        <div className="flex items-center">
-          <div className="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-lg shadow-lg z-10">
+        <div
+          className={`flex items-center transform transition-all duration-700 ease-out ${
+            animateTimeline
+              ? 'translate-x-0 opacity-100'
+              : '-translate-x-12 opacity-0'
+          }`}
+          style={{
+            animationDelay: `${1000 + learningPath.steps.length * 200}ms`,
+            transitionDelay: `${1000 + learningPath.steps.length * 200}ms`,
+          }}
+        >
+          <div className="bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center font-bold text-lg shadow-lg z-10 transform transition-transform hover:scale-110 duration-300 animate-pulse">
             🏆
           </div>
-          <div className="ml-6 bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+          <div className="ml-6 bg-green-50 p-4 rounded-lg border-l-4 border-green-500 transform transition-all hover:shadow-md hover:scale-[1.02] duration-300">
             <h3 className="text-xl font-bold text-green-800">
               Master Level Achieved!
             </h3>
@@ -167,6 +218,39 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* CSS for pulse ring animation */}
+        <style jsx>{`
+          .pulse-ring {
+            position: relative;
+          }
+          .pulse-ring::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0;
+            animation: pulse-ring 2s infinite;
+          }
+          @keyframes pulse-ring {
+            0% {
+              transform: scale(1);
+              opacity: 0.5;
+            }
+            50% {
+              transform: scale(1.1);
+              opacity: 0.3;
+            }
+            100% {
+              transform: scale(1.2);
+              opacity: 0;
+            }
+          }
+        `}</style>
       </div>
     );
   };
@@ -175,16 +259,22 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4 animate-fade-in-up">
             🎯 Learning Path Generator
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p
+            className="text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up"
+            style={{ animationDelay: '200ms' }}
+          >
             Enter any skill you want to master and get a personalized
             step-by-step learning roadmap with visual timeline
           </p>
         </div>
 
-        <div className="bg-white text-black rounded-2xl shadow-lg p-8 mb-8 max-w-2xl mx-auto">
+        <div
+          className="bg-white text-black rounded-2xl shadow-lg p-8 mb-8 max-w-2xl mx-auto animate-fade-in-up"
+          style={{ animationDelay: '400ms' }}
+        >
           <div className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
@@ -192,52 +282,68 @@ export default function Home() {
               onChange={(e) => setSkill(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="e.g., web development, cooking, guitar playing..."
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-lg"
+              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-lg transition-all duration-200 focus:scale-[1.02]"
             />
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed font-semibold text-lg transition-colors"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
             >
-              {loading ? 'Generating...' : 'Create Path'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Generating...
+                </span>
+              ) : (
+                'Create Path'
+              )}
             </button>
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center animate-shake">
               {error}
             </div>
           )}
         </div>
 
         {loading && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-600 text-lg">
+          <div className="flex flex-col items-center justify-center py-12 animate-fade-in">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+              <div className="absolute inset-0 animate-ping rounded-full h-12 w-12 border border-blue-400 opacity-20"></div>
+            </div>
+            <p className="text-gray-600 text-lg animate-pulse">
               Creating your learning path...
             </p>
           </div>
         )}
 
-        {learningPath && !loading && (
-          <div className="bg-white rounded-2xl shadow-lg p-8">
+        {learningPath && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 animate-fade-in-up">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3 animate-fade-in-up">
                 {learningPath.title}
               </h2>
-              <p className="text-lg text-gray-600">
+              <p
+                className="text-lg text-gray-600 animate-fade-in-up"
+                style={{ animationDelay: '200ms' }}
+              >
                 {learningPath.description}
               </p>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-8 mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center animate-fade-in-up">
                 Your Learning Journey
               </h3>
               {renderLearningTimeline()}
             </div>
 
-            <div>
+            <div
+              className="animate-fade-in-up"
+              style={{ animationDelay: '1000ms' }}
+            >
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
                 Quick Overview
               </h3>
@@ -245,11 +351,12 @@ export default function Home() {
                 {learningPath.steps.map((step, index) => (
                   <div
                     key={step.id}
-                    className="bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                    className="bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-all duration-300 transform hover:scale-105 hover:shadow-lg animate-fade-in-up"
+                    style={{ animationDelay: `${1200 + index * 100}ms` }}
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div
-                        className="rounded-full w-8 h-8 flex items-center justify-center font-bold text-white text-sm"
+                        className="rounded-full w-8 h-8 flex items-center justify-center font-bold text-white text-sm transform transition-transform hover:scale-110 duration-200"
                         style={{
                           backgroundColor: getDifficultyColor(step.difficulty),
                         }}
@@ -261,7 +368,7 @@ export default function Home() {
                       </h4>
                     </div>
                     <div className="flex gap-2 mb-2">
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs transform transition-transform hover:scale-105 duration-200">
                         {step.duration}
                       </span>
                       <span
@@ -281,6 +388,50 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Global animations CSS */}
+        <style jsx global>{`
+          @keyframes fade-in-up {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          @keyframes fade-in {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+          @keyframes shake {
+            0%,
+            100% {
+              transform: translateX(0);
+            }
+            25% {
+              transform: translateX(-5px);
+            }
+            75% {
+              transform: translateX(5px);
+            }
+          }
+          .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out forwards;
+            opacity: 0;
+          }
+          .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+          }
+          .animate-shake {
+            animation: shake 0.5s ease-in-out;
+          }
+        `}</style>
       </div>
     </div>
   );
