@@ -274,7 +274,7 @@ export default function Home() {
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-6xl">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 animate-fade-in-up px-2">
-            🎯 Learning Path Generator
+            Learning Path Generator
           </h1>
           <p
             className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up px-3 sm:px-0"
